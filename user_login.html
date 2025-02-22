@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://static.vecteezy.com/system/resources/previews/023/308/048/non_2x/abstract-grey-metallic-overlap-on-dark-circle-mesh-pattern-design-modern-luxury-futuristic-background-vector.jpg'); /* Professional background image */
+            background-size: cover; /* Ensures the image covers the entire background */
+            background-position: center; /* Centers the background image */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+            width: 300px;
+            text-align: center;
+            backdrop-filter: blur(10px); /* Adds a blur effect to the container */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Light border for better visibility */
+        }
+        .login-container h2 {
+            color: #fff; /* White text for better contrast */
+            margin-bottom: 20px;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Light border for inputs */
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent input background */
+            color: #fff; /* White text for inputs */
+        }
+        .login-container input::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Light placeholder text */
+        }
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #020b15;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease; /* Smooth button hover effect */
+        }
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+        #message {
+            color: #ff4d4d; /* Red color for error messages */
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Redirect to email verification page
+                window.location.href = `email_verification.php?user_id=${data.user_id}`;
+            } else {
+                document.getElementById('message').textContent = data.message;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('https://static.vecteezy.com/system/resources/previews/023/308/048/non_2x/abstract-grey-metallic-overlap-on-dark-circle-mesh-pattern-design-modern-luxury-futuristic-background-vector.jpg');
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .dashboard-wrapper {
+            display: flex;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 900px; /* Adjusted width to accommodate new buttons */
+        }
+        .dashboard-container {
+            padding: 40px;
+            width: 400px;
+        }
+        .dashboard-container h2 {
+            margin-bottom: 20px;
+            color: #343a40;
+            font-weight: 600;
+        }
+        .dashboard-container input, .dashboard-container select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+        }
+        .dashboard-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .dashboard-container button:hover {
+            background-color: #0056b3;
+        }
+        .user-list {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            width: 400px;
+            overflow-y: auto;
+        }
+        .user-list h3 {
+            margin-bottom: 10px;
+            color: #343a40;
+        }
+        .user-list input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+        }
+        .user-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .user-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-list li:last-child {
+            border-bottom: none;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .home-button:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Home Button -->
+    <button class="home-button" onclick="window.location.href='example1.html'">Home</button>
+
+    <div class="dashboard-wrapper">
+        <div class="dashboard-container">
+            <h2>Admin Dashboard</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <select id="branch">
+                <!-- Branches will be dynamically populated here -->
+            </select>
+            <select id="role">
+                <option value="faculty">Faculty</option>
+                <option value="office">Office</option>
+                <option value="hod">HOD</option>
+                <option value="principal">Principal</option>
+            </select>
+            <button onclick="addUser()">Add User</button>
+            <button onclick="addBranch()">Add Branch</button>
+            <button onclick="deleteBranch()">Delete Branch</button>
+            <button onclick="viewUsers()">View Users</button>
+        </div>
+        <div class="user-list" id="userList">
+            <h3>User List</h3>
+            <input type="text" id="searchBar" placeholder="Search users..." oninput="filterUsers()">
+            <ul id="userListItems"></ul>
+        </div>
+    </div>
+
+    <script>
+        let usersData = []; // Store user data for filtering
+
+        // Fetch branches on page load
+        fetchBranches();
+
+        function fetchBranches() {
+            fetch('get_branches.php')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const branchSelect = document.getElementById('branch');
+                        branchSelect.innerHTML = ''; // Clear existing options
+        
+                        // Add a default option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select a branch';
+                        branchSelect.appendChild(defaultOption);
+        
+                        // Add branches to the dropdown
+                        data.branches.forEach(branch => {
+                            const option = document.createElement('option');
+                            option.value = branch;
+                            option.textContent = branch.toUpperCase();
+                            branchSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('Failed to fetch branches:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching branches:', error);
+                });
+        }
+        
+        // Call fetchBranches on page load
+        document.addEventListener('DOMContentLoaded', fetchBranches);
+        function addUser() {
+            const formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('password', document.getElementById('password').value);
+            formData.append('branch', document.getElementById('branch').value);
+            formData.append('role', document.getElementById('role').value);
+
+            fetch('add_user.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data); // Show response message
+                viewUsers(); // Refresh the user list after adding a user
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function addBranch() {
+            const branchName = prompt("Enter the name of the new branch:");
+            if (branchName) {
+                fetch('add_branch.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ branch: branchName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message); // Show success or error message
+                    fetchBranches(); // Refresh the branch dropdown
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function deleteBranch() {
+            const branchName = prompt("Enter the name of the branch to delete:");
+            if (branchName) {
+                fetch('delete_branch.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ branch: branchName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message); // Show success or error message
+                    fetchBranches(); // Refresh the branch dropdown
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function deleteUser(username) {
+            if (!username) {
+                alert("Username is required to delete.");
+                return;
+            }
+
+            fetch('delete_user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Show success or error message
+                viewUsers(); // Refresh the user list after deleting a user
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function viewUsers() {
+            fetch('getall_users.php')
+            .then(response => response.json())
+            .then(data => {
+                usersData = data.users; // Store user data for filtering
+                renderUserList(usersData); // Render the user list
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function renderUserList(users) {
+            const userListItems = document.getElementById('userListItems');
+            userListItems.innerHTML = ''; // Clear the list before rendering
+
+            if (users.length > 0) {
+                users.forEach(user => {
+                    const li = document.createElement('li');
+                    li.textContent = `Username: ${user.username}, Email: ${user.email}, Branch: ${user.branch}, Role: ${user.role}`;
+
+                    // Add delete button
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.onclick = () => deleteUser(user.username); // Pass username to delete function
+                    li.appendChild(deleteBtn);
+
+                    userListItems.appendChild(li);
+                });
+            } else {
+                userListItems.innerHTML = '<p>No users found</p>';
+            }
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+            const filteredUsers = usersData.filter(user =>
+                user.username.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm) ||
+                user.branch.toLowerCase().includes(searchTerm) ||
+                user.role.toLowerCase().includes(searchTerm)
+            );
+            renderUserList(filteredUsers); // Render the filtered user list
+        }
+    </script>
+</body>
+</html>
